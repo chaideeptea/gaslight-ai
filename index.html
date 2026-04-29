@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Deck Lite</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/framer-motion/dist/framer-motion.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #111; overflow: hidden; }
+        .card-container { perspective: 1000px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/javascript">
+        const { useState } = React;
+        const { motion, AnimatePresence, useMotionValue, useTransform } = FramerMotion;
+
+        const INITIAL_CARDS = [
+            { id: 1, text: "Explore the Mountains", color: "bg-emerald-500", img: "🏔️" },
+            { id: 2, text: "Dive into the Ocean", color: "bg-blue-500", img: "🌊" },
+            { id: 3, text: "Urban Jungle Life", color: "bg-orange-500", img: "🏙️" },
+            { id: 4, text: "Starlit Desert Nights", color: "bg-purple-600", img: "🌵" }
+        ];
+
+        const Card = ({ card, removeCard, isTop }) => {
+            const x = useMotionValue(0);
+            
+            // Map the x-position to rotation and opacity
+            const rotate = useTransform(x, [-200, 200], [-25, 25]);
+            const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
+
+            const handleDragEnd = (event, info) => {
+                if (Math.abs(info.offset.x) > 100) {
+                    removeCard(card.id, info.offset.x > 0 ? "right" : "left");
+                }
+            };
+
+            return (
+                <motion.div
+                    style={{ x, rotate, opacity, gridArea: "1 / 1" }}
+                    drag={isTop ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={handleDragEnd}
+                    whileTap={{ scale: 1.05 }}
+                    className={`w-80 h-96 ${card.color} rounded-2xl shadow-2xl flex flex-col items-center justify-center text-white cursor-grab active:cursor-grabbing border-4 border-white/20`}
+                >
+                    <span className="text-8xl mb-4">{card.img}</span>
+                    <h2 className="text-2xl font-bold px-6 text-center">{card.text}</h2>
+                </motion.div>
+            );
+        };
+
+        const App = () => {
+            const [cards, setCards] = useState(INITIAL_CARDS);
+
+            const removeCard = (id, direction) => {
+                console.log(`Swiped ${direction} on card ${id}`);
+                setCards((prev) => prev.filter((card) => card.id !== id));
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center h-screen overflow-hidden">
+                    <div className="mb-8 text-center">
+                        <h1 className="text-white text-3xl font-black tracking-tight">SWIPE DECK</h1>
+                        <p className="text-gray-400">Left to Skip • Right to Like</p>
+                    </div>
+
+                    <div className="card-container grid place-items-center relative">
+                        <AnimatePresence>
+                            {cards.map((card, index) => (
+                                <Card 
+                                    key={card.id} 
+                                    card={card} 
+                                    removeCard={removeCard} 
+                                    isTop={index === cards.length - 1} 
+                                />
+                            ))}
+                        </AnimatePresence>
+                        
+                        {cards.length === 0 && (
+                            <motion.button 
+                                initial={{ opacity: 0 }} 
+                                animate={{ opacity: 1 }}
+                                onClick={() => setCards(INITIAL_CARDS)}
+                                className="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition"
+                            >
+                                Reset Deck
+                            </motion.button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
