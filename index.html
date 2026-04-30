@@ -8,6 +8,7 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/framer-motion/dist/framer-motion.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
 body { background: #111; overflow: hidden; }
 .card-container { perspective: 1000px; }
@@ -15,9 +16,9 @@ body { background: #111; overflow: hidden; }
 </head>
 <body>
 <div id="root"></div>
-<script type="text/javascript">
+<script type="text/babel">
 const { useState } = React;
-const { motion, AnimatePresence, useMotionValue, useTransform } = FramerMotion;
+const { motion, AnimatePresence, useMotionValue, useTransform } = window.FramerMotion || FramerMotion;
 const INITIAL_CARDS = [
 { id: 1, text: "Explore the Mountains", color: "bg-emerald-500", img: "🏔" },
 { id: 2, text: "Dive into the Ocean", color: "bg-blue-500", img: "🌊" },
