@@ -3,17 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Swipe Deck Lite</title>
+<title>Card Scroll</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-body { background: #111; overflow: hidden; margin: 0; }
-.card-container { perspective: 1000px; }
+body { background: #111; margin: 0; overflow: hidden; }
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 20px;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+.scroll-container::-webkit-scrollbar-track {
+  background: #222;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
 .card {
+  flex-shrink: 0;
   width: 300px;
   height: 400px;
-  position: absolute;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   display: flex;
@@ -21,114 +38,50 @@ body { background: #111; overflow: hidden; margin: 0; }
   align-items: center;
   justify-content: center;
   color: white;
-  cursor: grab;
   user-select: none;
-  touch-action: none;
-}
-.card.dragging {
-  cursor: grabbing;
 }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-const { useState, useRef, useEffect } = React;
+const { useState, useRef } = React;
 
 const INITIAL_CARDS = [
   { id: 1, text: "Explore the Mountains", color: "bg-emerald-500", img: "🏔" },
   { id: 2, text: "Dive into the Ocean", color: "bg-blue-500", img: "🌊" },
   { id: 3, text: "Urban Jungle Life", color: "bg-orange-500", img: "🏙" },
-  { id: 4, text: "Starlit Desert Nights", color: "bg-purple-600", img: "🌵" }
+  { id: 4, text: "Starlit Desert Nights", color: "bg-purple-600", img: "🌵" },
+  { id: 5, text: "Forest Adventure", color: "bg-green-600", img: "🌲" },
+  { id: 6, text: "Beach Sunset", color: "bg-pink-500", img: "🏖" },
+  { id: 7, text: "City Lights", color: "bg-indigo-600", img: "🌃" },
+  { id: 8, text: "Snowy Peaks", color: "bg-sky-300", img: "❄" }
 ];
 
-const Card = ({ card, removeCard, isTop }) => {
-  const cardRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const startPos = useRef(null);
-
-  const handleStart = (e) => {
-    if (!isTop) return;
-    
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    setIsDragging(true);
-    startPos.current = { x: clientX, y: clientY };
-  };
-
-  const handleMove = (e) => {
-    if (!isDragging || !startPos.current) return;
-    
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    const dx = clientX - startPos.current.x;
-    const dy = clientY - startPos.current.y;
-    
-    setOffset({ x: dx, y: dy });
-  };
-
-  const handleEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    
-    // Check if swiped far enough (more than 50px)
-    if (Math.abs(offset.x) > 50) {
-      removeCard(card.id, offset.x > 0 ? "right" : "left");
-    } else {
-      // Snap back if not far enough
-      setOffset({ x: 0, y: 0 });
-    }
-    startPos.current = null;
-  };
-
-  useEffect(() => {
-    const cardElement = cardRef.current;
-    if (!cardElement) return;
-
-    cardElement.addEventListener('mousedown', handleStart);
-    cardElement.addEventListener('touchstart', handleStart);
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('touchmove', handleMove);
-    document.addEventListener('mouseup', handleEnd);
-    document.addEventListener('touchend', handleEnd);
-
-    return () => {
-      cardElement.removeEventListener('mousedown', handleStart);
-      cardElement.removeEventListener('touchstart', handleStart);
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('touchmove', handleMove);
-      document.removeEventListener('mouseup', handleEnd);
-      document.removeEventListener('touchend', handleEnd);
-    };
-  }, [isDragging, offset]);
-
-  const rotation = (offset.x / 100) * 25;
-  const opacity = Math.max(0, 1 - Math.abs(offset.x) / 200);
-
+const Card = ({ card }) => {
   return React.createElement('div', {
-    ref: cardRef,
     className: `card ${card.color}`,
     style: {
-      transform: `translateX(${offset.x}px) translateY(${offset.y}px) rotate(${rotation}deg)`,
-      opacity: opacity,
-      zIndex: isTop ? 10 : 1,
-      transition: isDragging ? 'none' : 'all 0.3s ease-out'
+      flex: '0 0 auto'
     }
   },
     React.createElement('span', { style: { fontSize: '60px', marginBottom: '20px' } }, card.img),
-    React.createElement('h2', { style: { fontSize: '24px', fontWeight: 'bold', textAlign: 'center', margin: '0 20px' } }, card.text)
+    React.createElement('h2', { style: { fontSize: '20px', fontWeight: 'bold', textAlign: 'center', margin: '0 20px' } }, card.text)
   );
 };
 
 const App = () => {
-  const [cards, setCards] = useState(INITIAL_CARDS);
+  const [cards] = useState(INITIAL_CARDS);
+  const scrollContainerRef = useRef(null);
 
-  const removeCard = (id, direction) => {
-    console.log(`Swiped ${direction} on card ${id}`);
-    setCards((prev) => prev.filter((card) => card.id !== id));
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 340; // card width + gap
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'right' ? scrollAmount : -scrollAmount,
+        behavior: 'smooth'
+      });
+    }
   };
 
   return React.createElement('div', {
@@ -143,7 +96,7 @@ const App = () => {
   },
     React.createElement('div', {
       style: {
-        marginBottom: '30px',
+        marginBottom: '20px',
         textAlign: 'center'
       }
     },
@@ -155,40 +108,71 @@ const App = () => {
           margin: '0',
           letterSpacing: '2px'
         }
-      }, 'SWIPE DECK'),
+      }, 'CARD SCROLL'),
       React.createElement('p', {
         style: { color: '#888', margin: '10px 0 0 0', fontSize: '14px' }
-      }, 'Drag left to skip • Drag right to like')
+      }, 'Scroll left or right to explore')
     ),
     React.createElement('div', {
-      className: 'card-container',
       style: {
         position: 'relative',
-        width: '300px',
-        height: '400px'
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px'
       }
     },
-      cards.map((card, index) =>
-        React.createElement(Card, {
-          key: card.id,
-          card: card,
-          removeCard: removeCard,
-          isTop: index === cards.length - 1
-        })
-      ),
-      cards.length === 0 && React.createElement('button', {
-        onClick: () => setCards(INITIAL_CARDS),
+      React.createElement('button', {
+        onClick: () => scroll('left'),
         style: {
-          backgroundColor: 'white',
-          color: 'black',
-          padding: '12px 24px',
-          borderRadius: '50px',
-          fontWeight: 'bold',
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'white',
           border: 'none',
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
           cursor: 'pointer',
-          fontSize: '16px'
+          fontSize: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+          flexShrink: 0
         }
-      }, 'Reset Deck')
+      }, '←'),
+      React.createElement('div', {
+        ref: scrollContainerRef,
+        className: 'scroll-container',
+        style: {
+          flex: 1,
+          overflow: 'hidden'
+        }
+      },
+        cards.map((card) =>
+          React.createElement(Card, {
+            key: card.id,
+            card: card
+          })
+        )
+      ),
+      React.createElement('button', {
+        onClick: () => scroll('right'),
+        style: {
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'white',
+          border: 'none',
+          width: '50px',
+          height: '50px',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          fontSize: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+          flexShrink: 0
+        }
+      }, '→')
     )
   );
 };
