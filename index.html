@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Card Scroll</title>
+<title>Funny little how tos</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -56,14 +56,12 @@ html { overflow: hidden; }
 const { useState, useRef } = React;
 
 const INITIAL_CARDS = [
-  { id: 1, text: "Explore the Mountains", color: "bg-emerald-500", img: "🏔" },
-  { id: 2, text: "Dive into the Ocean", color: "bg-blue-500", img: "🌊" },
-  { id: 3, text: "Urban Jungle Life", color: "bg-orange-500", img: "🏙" },
-  { id: 4, text: "Starlit Desert Nights", color: "bg-purple-600", img: "🌵" },
-  { id: 5, text: "Forest Adventure", color: "bg-green-600", img: "🌲" },
-  { id: 6, text: "Beach Sunset", color: "bg-pink-500", img: "🏖" },
-  { id: 7, text: "City Lights", color: "bg-indigo-600", img: "🌃" },
-  { id: 8, text: "Snowy Peaks", color: "bg-sky-300", img: "❄" }
+  { id: 1, text: "Gaslight AI into turning itself off", color: "bg-emerald-500", img: "🏔" },
+  { id: 2, text: "Talk to it like it's an immigrant, I've heard these said to me", color: "bg-blue-500", img: "🌊" },
+  { id: 3, text: "Talk to it like it's a woman, I'm still hearing many of these", color: "bg-orange-500", img: "🏙" },
+  { id: 4, text: "Give it all the cliched break-up lines", color: "bg-purple-600", img: "🌵" },
+  { id: 5, text: "Respond back with lines shrinks use", color: "bg-green-600", img: "🌲" },
+  { id: 6, text: "Talk to it like it is a 3 year old", color: "bg-pink-500", img: "🏖" }
 ];
 
 const Card = ({ card }) => {
